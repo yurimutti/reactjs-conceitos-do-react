@@ -10,20 +10,48 @@ interface Task {
   isComplete: boolean;
 }
 
+let count = 0
+
 export function TaskList() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState('');
 
   function handleCreateNewTask() {
     // Crie uma nova task com um id random, não permita criar caso o título seja vazio.
+
+    if(newTaskTitle.length > 0) {
+      setTasks([
+        ...tasks,
+        {
+          id: count++,
+          title: newTaskTitle,
+          isComplete: false,
+        }
+      ])
+    } 
+
   }
 
-  function handleToggleTaskCompletion(id: number) {
+  function handleToggleTaskCompletion(id: number, index) {
     // Altere entre `true` ou `false` o campo `isComplete` de uma task com dado ID
+    console.log(index)
+    tasks.forEach((task) => {
+
+      const newItem = {
+        ...task,
+        isComplete: !task.isComplete,
+      }
+      
+      if(task.id === id) {
+          setTasks(prev => [...prev.slice(0, index + 1), newItem, ...prev.slice(index + 1) ])
+      } 
+    })
+
   }
 
   function handleRemoveTask(id: number) {
     // Remova uma task da listagem pelo ID
+    setTasks(prev => prev.filter(item => item.id !== id)  )
   }
 
   return (
@@ -46,7 +74,7 @@ export function TaskList() {
 
       <main>
         <ul>
-          {tasks.map(task => (
+          {tasks.map((task, index) => (
             <li key={task.id}>
               <div className={task.isComplete ? 'completed' : ''} data-testid="task" >
                 <label className="checkbox-container">
@@ -54,7 +82,7 @@ export function TaskList() {
                     type="checkbox"
                     readOnly
                     checked={task.isComplete}
-                    onClick={() => handleToggleTaskCompletion(task.id)}
+                    onClick={() => handleToggleTaskCompletion(task.id, index)}
                   />
                   <span className="checkmark"></span>
                 </label>
